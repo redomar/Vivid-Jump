@@ -11,14 +11,16 @@ import java.util.Calendar;
 
 import javax.swing.JFrame;
 
+import com.redomar.vivid.level.LevelHandler;
+
 public class Game extends Canvas implements Runnable{
 
 	//Declaration of variables
 	//Game Width and Height is are 4:3 
 	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = 160;
-	private static final int HEIGHT = (WIDTH / 4 * 3);
-	private static final int SCALE = 3;
+	private static final int HEIGHT = 120;
+	private static final int SCALE = 4;
 	private static final String version = "Alpha 1.0";
 	private static final String title = "Vivid Jump"+" "+version;
 	
@@ -28,6 +30,14 @@ public class Game extends Canvas implements Runnable{
 	private boolean running = false;
 	private boolean buffer = false;
 	private boolean buffered = false;
+	
+	private LevelHandler levelHandler;
+	
+	public void init(){
+		levelHandler = new LevelHandler(16, "/levels/test.txt");
+		levelHandler.loadSheet("/tiles.png");
+		this.setFocusable(true);
+	}
 	
 	public synchronized void start(){
 		running = true;
@@ -49,7 +59,12 @@ public class Game extends Canvas implements Runnable{
 		long lastTimer = System.currentTimeMillis();
 		double delta = 0;
 
-		//init();
+		if(!buffer){
+			consoleOuput("Buffering Graphics");
+			buffer = true;
+		}
+		
+		init();
 
 		while (running) {
 			long now = System.nanoTime();
@@ -79,12 +94,7 @@ public class Game extends Canvas implements Runnable{
 		
 	}
 
-	private void render() {
-		if(!buffer){
-			consoleOuput("Buffering Graphics");
-			buffer = true;
-		}
-		
+	private void render() {	
 		BufferStrategy bs = getBufferStrategy();
 		if(bs==null){
 			createBufferStrategy(3);
@@ -98,6 +108,9 @@ public class Game extends Canvas implements Runnable{
 		g = bs.getDrawGraphics();
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, SCALE * WIDTH, SCALE * HEIGHT);
+		
+		levelHandler.render(g);
+		
 		g.dispose();
 		bs.show();
 		if(!buffered){
